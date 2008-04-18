@@ -1,4 +1,3 @@
-# $Id: PKGBUILD,v 1.51 2007/11/30 23:46:40 tom Exp $
 # Maintainer: judd <jvinet@zeroflux.org>
 
 pkgname=shadow
