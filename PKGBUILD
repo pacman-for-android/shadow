@@ -3,7 +3,7 @@
 
 pkgname=shadow
 pkgver=4.4
-pkgrel=1
+pkgrel=2
 pkgdesc="Password and account management tool suite with support for shadow files and PAM"
 arch=('i686' 'x86_64')
 url='https://github.com/shadow-maint/shadow'
@@ -59,6 +59,9 @@ prepare() {
   # need to offer these upstream
   patch -Np1 <"$srcdir/xstrdup.patch"
   patch -Np1 <"$srcdir/shadow-strncpy-usage.patch"
+
+  # Fix regression in useradd not loading defaults properly.
+  git cherry-pick -n '507f96cdeb54079fb636c7ce21e371f7a16a520e'
 
   autoreconf -v -f --install
 
