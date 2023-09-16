@@ -1,0 +1,315 @@
+diff --git a/shadow-4.13.orig/contrib/adduser.c b/shadow-4.13/contrib/adduser.c
+index deebd4c..386a1b0 100644
+--- a/shadow-4.13.orig/contrib/adduser.c
++++ b/shadow-4.13/contrib/adduser.c
+@@ -130,12 +130,12 @@
+ 				 * But they're probably a poor idea */
+ 
+ 
+-#define DEFAULT_SHELL	"/bin/bash"	/* because BASH is your friend */
+-#define DEFAULT_HOME	"/home"
+-#define USERADD_PATH	"/usr/sbin/useradd"
+-#define CHAGE_PATH	"/usr/bin/chage"
+-#define PASSWD_PATH	"/usr/bin/passwd"
+-#define EDQUOTA_PATH	"/usr/sbin/edquota"
++#define DEFAULT_SHELL	"/data/usr/bin/bash"	/* because BASH is your friend */
++#define DEFAULT_HOME	"/data/home"
++#define USERADD_PATH	"/data/usr/bin/useradd"
++#define CHAGE_PATH	"/data/usr/bin/chage"
++#define PASSWD_PATH	"/data/usr/bin/passwd"
++#define EDQUOTA_PATH	"/data/usr/sbin/edquota"
+ #define QUOTA_DEFAULT	"defuser"
+ #define DEFAULT_GROUP	100
+ 
+diff --git a/shadow-4.13.orig/etc/login.defs b/shadow-4.13/etc/login.defs
+index ea84125..6bda413 100644
+--- a/shadow-4.13.orig/etc/login.defs
++++ b/shadow-4.13/etc/login.defs
+@@ -55,8 +55,8 @@ HUSHLOGIN_FILE	.hushlogin
+ # *REQUIRED*  The default PATH settings, for superuser and normal users.
+ #
+ # (they are minimal, add the rest in the shell startup files)
+-ENV_SUPATH	PATH=/usr/local/sbin:/usr/local/bin:/usr/bin
+-ENV_PATH	PATH=/usr/local/sbin:/usr/local/bin:/usr/bin
++ENV_SUPATH	PATH=/data/usr/local/sbin:/data/usr/local/bin:/data/usr/bin:/product/bin:/vendor/bin:/system_ext/bin:/system/bin
++ENV_PATH	PATH=/data/usr/local/sbin:/data/usr/local/bin:/data/usr/bin:/product/bin:/vendor/bin:/system_ext/bin:/system/bin
+ 
+ #
+ # Terminal permissions
+diff --git a/shadow-4.13.orig/lib/defines.h b/shadow-4.13/lib/defines.h
+index d01f691..96fa9f9 100644
+--- a/shadow-4.13.orig/lib/defines.h
++++ b/shadow-4.13/lib/defines.h
+@@ -250,20 +250,20 @@ static inline void memzero(void *ptr, size_t size)
+ 	(strncpy((A), (B), sizeof(A) - 1), (A)[sizeof(A) - 1] = '\0')
+ 
+ #ifndef PASSWD_FILE
+-#define PASSWD_FILE "/etc/passwd"
++#define PASSWD_FILE "/data/etc/passwd"
+ #endif
+ 
+ #ifndef GROUP_FILE
+-#define GROUP_FILE "/etc/group"
++#define GROUP_FILE "/data/etc/group"
+ #endif
+ 
+ #ifndef SHADOW_FILE
+-#define SHADOW_FILE "/etc/shadow"
++#define SHADOW_FILE "/data/etc/shadow"
+ #endif
+ 
+ #ifdef SHADOWGRP
+ #ifndef SGROUP_FILE
+-#define SGROUP_FILE "/etc/gshadow"
++#define SGROUP_FILE "/data/etc/gshadow"
+ #endif
+ #endif
+ 
+diff --git a/shadow-4.13.orig/lib/getdef.c b/shadow-4.13/lib/getdef.c
+index dcd1fe7..f599282 100644
+--- a/shadow-4.13.orig/lib/getdef.c
++++ b/shadow-4.13/lib/getdef.c
+@@ -162,10 +162,10 @@ static const char* vendordir = VENDORDIR;
+ #else
+ static const char* vendordir = NULL;
+ #endif
+-static const char* sysconfdir = "/etc";
++static const char* sysconfdir = "/data/etc";
+ #else
+ #ifndef LOGINDEFS
+-#define LOGINDEFS "/etc/login.defs"
++#define LOGINDEFS "/data/etc/login.defs"
+ #endif
+ 
+ static const char* def_fname = LOGINDEFS;	/* login config defs file       */
+diff --git a/shadow-4.13.orig/lib/gshadow_.h b/shadow-4.13/lib/gshadow_.h
+index 68a0bb6..4fe9212 100644
+--- a/shadow-4.13.orig/lib/gshadow_.h
++++ b/shadow-4.13/lib/gshadow_.h
+@@ -48,5 +48,5 @@ void endsgent ();
+ int putsgent ();
+ #endif
+ 
+-#define	GSHADOW	"/etc/gshadow"
++#define	GSHADOW	"/data/etc/gshadow"
+ #endif				/* ifndef _H_GSHADOW */
+diff --git a/shadow-4.13.orig/lib/nss.c b/shadow-4.13/lib/nss.c
+index 23d0518..97ff5b7 100644
+--- a/shadow-4.13.orig/lib/nss.c
++++ b/shadow-4.13/lib/nss.c
+@@ -11,7 +11,7 @@
+ #include "shadowlog_internal.h"
+ #include "shadowlog.h"
+ 
+-#define NSSWITCH "/etc/nsswitch.conf"
++#define NSSWITCH "/data/etc/nsswitch.conf"
+ 
+ // NSS plugin handling for subids
+ // If nsswitch has a line like
+diff --git a/shadow-4.13.orig/lib/subordinateio.c b/shadow-4.13/lib/subordinateio.c
+index bd1af26..f9c01b5 100644
+--- a/shadow-4.13.orig/lib/subordinateio.c
++++ b/shadow-4.13/lib/subordinateio.c
+@@ -208,7 +208,7 @@ static const struct subordinate_range *find_range(struct commonio_db *db,
+         /*
+          * We only do special handling for these two files
+          */
+-        if ((0 != strcmp(db->filename, "/etc/subuid")) && (0 != strcmp(db->filename, "/etc/subgid")))
++        if ((0 != strcmp(db->filename, "/data/etc/subuid")) && (0 != strcmp(db->filename, "/data/etc/subgid")))
+                 return NULL;
+ 
+         /*
+@@ -556,7 +556,7 @@ static int remove_range (struct commonio_db *db,
+ }
+ 
+ static struct commonio_db subordinate_uid_db = {
+-	"/etc/subuid",		/* filename */
++	"/data/etc/subuid",		/* filename */
+ 	&subordinate_ops,	/* ops */
+ 	NULL,			/* fp */
+ #ifdef WITH_SELINUX
+@@ -652,7 +652,7 @@ uid_t sub_uid_find_free_range(uid_t min, uid_t max, unsigned long count)
+ }
+ 
+ static struct commonio_db subordinate_gid_db = {
+-	"/etc/subgid",		/* filename */
++	"/data/etc/subgid",		/* filename */
+ 	&subordinate_ops,	/* ops */
+ 	NULL,			/* fp */
+ #ifdef WITH_SELINUX
+diff --git a/shadow-4.13.orig/libmisc/limits.c b/shadow-4.13/libmisc/limits.c
+index fea85fe..f310e16 100644
+--- a/shadow-4.13.orig/libmisc/limits.c
++++ b/shadow-4.13/libmisc/limits.c
+@@ -34,7 +34,7 @@
+ #endif
+ #ifdef LIMITS
+ #ifndef LIMITS_FILE
+-#define LIMITS_FILE "/etc/limits"
++#define LIMITS_FILE "/data/etc/limits"
+ #endif
+ #define LOGIN_ERROR_RLIMIT	1
+ #define LOGIN_ERROR_LOGIN	2
+diff --git a/shadow-4.13.orig/libmisc/prefix_flag.c b/shadow-4.13/libmisc/prefix_flag.c
+index 4eb5154..383b24f 100644
+--- a/shadow-4.13.orig/libmisc/prefix_flag.c
++++ b/shadow-4.13/libmisc/prefix_flag.c
+@@ -120,23 +120,23 @@ extern const char* process_prefix_flag (const char* short_opt, int argc, char **
+ 		spw_setdbname(spw_db_file);
+ 
+ #ifdef ENABLE_SUBIDS
+-		len = strlen(prefix) + strlen("/etc/subuid") + 2;
++		len = strlen(prefix) + strlen("/data/etc/subuid") + 2;
+ 		suid_db_file = xmalloc(len);
+-		snprintf(suid_db_file, len, "%s/%s", prefix, "/etc/subuid");
++		snprintf(suid_db_file, len, "%s/%s", prefix, "/data/etc/subuid");
+ 		sub_uid_setdbname(suid_db_file);
+ 
+-		len = strlen(prefix) + strlen("/etc/subgid") + 2;
++		len = strlen(prefix) + strlen("/data/etc/subgid") + 2;
+ 		sgid_db_file = xmalloc(len);
+-		snprintf(sgid_db_file, len, "%s/%s", prefix, "/etc/subgid");
++		snprintf(sgid_db_file, len, "%s/%s", prefix, "/data/etc/subgid");
+ 		sub_gid_setdbname(sgid_db_file);
+ #endif
+ 
+ #ifdef USE_ECONF
+ 		setdef_config_file(prefix);
+ #else
+-		len = strlen(prefix) + strlen("/etc/login.defs") + 2;
++		len = strlen(prefix) + strlen("/data/etc/login.defs") + 2;
+ 		def_conf_file = xmalloc(len);
+-		snprintf(def_conf_file, len, "%s/%s", prefix, "/etc/login.defs");
++		snprintf(def_conf_file, len, "%s/%s", prefix, "/data/etc/login.defs");
+ 		setdef_config_file(def_conf_file);
+ #endif
+ 	}
+diff --git a/shadow-4.13.orig/src/chsh.c b/shadow-4.13/src/chsh.c
+index 21d1c3e..37f8a04 100644
+--- a/shadow-4.13.orig/src/chsh.c
++++ b/shadow-4.13/src/chsh.c
+@@ -31,7 +31,7 @@
+ #include "shadowlog.h"
+ 
+ #ifndef SHELLS_FILE
+-#define SHELLS_FILE "/etc/shells"
++#define SHELLS_FILE "/data/etc/shells"
+ #endif
+ /*
+  * Global variables
+diff --git a/shadow-4.13.orig/src/login_nopam.c b/shadow-4.13/src/login_nopam.c
+index df6ba88..b1b2abb 100644
+--- a/shadow-4.13.orig/src/login_nopam.c
++++ b/shadow-4.13/src/login_nopam.c
+@@ -64,7 +64,7 @@
+ 
+  /* Path name of the access control file. */
+ #ifndef	TABLE
+-#define TABLE	"/etc/login.access"
++#define TABLE	"/data/etc/login.access"
+ #endif
+ 
+ /* Delimiters for fields and for lists of users, ttys or hosts. */
+diff --git a/shadow-4.13.orig/src/logoutd.c b/shadow-4.13/src/logoutd.c
+index 03680f3..6f95547 100644
+--- a/shadow-4.13.orig/src/logoutd.c
++++ b/shadow-4.13/src/logoutd.c
+@@ -28,7 +28,7 @@ const char *Prog;
+ #endif
+ 
+ #ifndef HUP_MESG_FILE
+-#define HUP_MESG_FILE "/etc/logoutd.mesg"
++#define HUP_MESG_FILE "/data/etc/logoutd.mesg"
+ #endif
+ 
+ /* local function prototypes */
+diff --git a/shadow-4.13.orig/src/suauth.c b/shadow-4.13/src/suauth.c
+index 2641d33..3ee85f6 100644
+--- a/shadow-4.13.orig/src/suauth.c
++++ b/shadow-4.13/src/suauth.c
+@@ -17,7 +17,7 @@
+ #include "prototypes.h"
+ 
+ #ifndef SUAUTHFILE
+-#define SUAUTHFILE "/etc/suauth"
++#define SUAUTHFILE "/data/etc/suauth"
+ #endif
+ 
+ #define	NOACTION	0
+diff --git a/shadow-4.13.orig/src/useradd.c b/shadow-4.13/src/useradd.c
+index 7ea0a9c..84331b2 100644
+--- a/shadow-4.13.orig/src/useradd.c
++++ b/shadow-4.13/src/useradd.c
+@@ -59,17 +59,17 @@
+ #include "shadowlog.h"
+ 
+ #ifndef SKEL_DIR
+-#define SKEL_DIR "/etc/skel"
++#define SKEL_DIR "/data/etc/skel"
+ #endif
+ #ifndef USER_DEFAULTS_FILE
+-#define USER_DEFAULTS_FILE "/etc/default/useradd"
+-#define NEW_USER_FILE "/etc/default/nuaddXXXXXX"
++#define USER_DEFAULTS_FILE "/data/etc/default/useradd"
++#define NEW_USER_FILE "/data/etc/default/nuaddXXXXXX"
+ #endif
+ /*
+  * Needed for MkLinux DR1/2/2.1 - J.
+  */
+ #ifndef LASTLOG_FILE
+-#define LASTLOG_FILE "/var/log/lastlog"
++#define LASTLOG_FILE "/data/var/log/lastlog"
+ #endif
+ /*
+  * Global variables
+@@ -81,8 +81,8 @@ const char *Prog;
+  */
+ static gid_t def_group = 1000;
+ static const char *def_gname = "other";
+-static const char *def_home = "/home";
+-static const char *def_shell = "/bin/bash";
++static const char *def_home = "/data/home";
++static const char *def_shell = "/data/usr/bin/bash";
+ static const char *def_template = SKEL_DIR;
+ static const char *def_create_mail_spool = "yes";
+ static const char *def_log_init = "yes";
+@@ -2511,7 +2511,7 @@ int main (int argc, char **argv)
+ 	    (!user_id || (user_id <= uid_max && user_id >= uid_min));
+ #endif				/* ENABLE_SUBIDS */
+ 
+-	if (run_parts ("/etc/shadow-maint/useradd-pre.d", user_name,
++	if (run_parts ("/data/etc/shadow-maint/useradd-pre.d", user_name,
+ 			"useradd")) {
+ 		exit(1);
+ 	}
+@@ -2734,7 +2734,7 @@ int main (int argc, char **argv)
+ 		create_mail ();
+ 	}
+ 
+-	if (run_parts ("/etc/shadow-maint/useradd-post.d", user_name,
++	if (run_parts ("/data/etc/shadow-maint/useradd-post.d", user_name,
+ 			"useradd")) {
+ 		exit(1);
+ 	}
+diff --git a/shadow-4.13.orig/src/userdel.c b/shadow-4.13/src/userdel.c
+index 7012b0e..70f3a18 100644
+--- a/shadow-4.13.orig/src/userdel.c
++++ b/shadow-4.13/src/userdel.c
+@@ -1126,7 +1126,7 @@ int main (int argc, char **argv)
+ 	{
+ 		const struct passwd *pwd;
+ 
+-		if (run_parts ("/etc/shadow-maint/userdel-pre.d", user_name,
++		if (run_parts ("/data/etc/shadow-maint/userdel-pre.d", user_name,
+ 				"userdel")) {
+ 			exit(1);
+ 		}
+@@ -1329,7 +1329,7 @@ int main (int argc, char **argv)
+ 		user_cancel (user_name);
+ 	close_files ();
+ 
+-	if (run_parts ("/etc/shadow-maint/userdel-post.d", user_name, "userdel")) {
++	if (run_parts ("/data/etc/shadow-maint/userdel-post.d", user_name, "userdel")) {
+ 		exit(1);
+ 	}
+ 
